@@ -1,13 +1,9 @@
 from pathlib import Path
 
 
-def rename_files(folder_path: str, base_name: str):
+def generate_preview(folder_path: str, base_name: str):
     """
-    Rename all files in a folder sequentially.
-
-    Example:
-    IMG001.jpg -> Photo_001.jpg
-    IMG002.jpg -> Photo_002.jpg
+    Generate old and new filenames without renaming files.
     """
 
     folder = Path(folder_path)
@@ -22,16 +18,37 @@ def rename_files(folder_path: str, base_name: str):
 
     files.sort()
 
+    preview = []
+
+    for index, file in enumerate(files, start=1):
+        extension = file.suffix
+        new_name = f"{base_name}_{index:03d}{extension}"
+
+        preview.append(
+            {
+                "old_name": file.name,
+                "new_name": new_name,
+                "path": file,
+            }
+        )
+
+    return True, preview
+
+
+def rename_files(preview):
+    """
+    Rename files using the generated preview.
+    """
+
     renamed = 0
     errors = []
 
-    for index, file in enumerate(files, start=1):
+    for item in preview:
         try:
-            extension = file.suffix
-            new_name = f"{base_name}_{index:03d}{extension}"
-            new_path = folder / new_name
+            old_path = item["path"]
+            new_path = old_path.parent / item["new_name"]
 
-            file.rename(new_path)
+            old_path.rename(new_path)
             renamed += 1
 
         except Exception as e:
